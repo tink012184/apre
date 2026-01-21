@@ -25,13 +25,17 @@ import { CallDurationByDateRangeComponent } from './reports/agent-performance/ca
 import { ChannelRatingByMonthComponent } from './reports/customer-feedback/channel-rating-by-month/channel-rating-by-month.component';
 import { CustomerFeedbackComponent } from './reports/customer-feedback/customer-feedback.component';
 import { SalesByRegionTabularComponent } from './reports/sales/sales-by-region-tabular/sales-by-region-tabular.component';
+<<<<<<< HEAD
 import { SalesByMonthComponent } from './reports/sales/sales-by-month/sales-by-month.component';
+=======
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
 
 // Export user-management routes
 export const userManagementRoutes: Routes = [
   {
     path: '',
     redirectTo: 'users',
+<<<<<<< HEAD
     pathMatch: 'full',
   },
   {
@@ -47,11 +51,29 @@ export const userManagementRoutes: Routes = [
     component: UserDetailsComponent,
   },
 ];
+=======
+    pathMatch: 'full'
+  },
+  {
+    path: 'users',
+    component: UsersComponent
+  },
+  {
+    path: 'users/new',
+    component: UserCreateComponent
+  },
+  {
+    path: 'users/:id',
+    component: UserDetailsComponent
+  }
+]
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
 
 // Sales reports routes
 export const salesReportRoutes: Routes = [
   {
     path: 'sales-by-region',
+<<<<<<< HEAD
     component: SalesByRegionComponent,
   },
   {
@@ -62,22 +84,40 @@ export const salesReportRoutes: Routes = [
     path: 'sales-by-month',
     component: SalesByMonthComponent,
   },
+=======
+    component: SalesByRegionComponent
+  },
+  {
+    path: 'sales-by-region-tabular',
+    component: SalesByRegionTabularComponent
+  }
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
 ];
 
 // Agent performance routes
 export const agentPerformanceRoutes: Routes = [
   {
     path: 'call-duration-by-date-range',
+<<<<<<< HEAD
     component: CallDurationByDateRangeComponent,
   },
+=======
+    component: CallDurationByDateRangeComponent
+  }
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
 ];
 
 // Customer feedback routes
 export const customerFeedbackRoutes: Routes = [
   {
     path: 'channel-rating-by-month',
+<<<<<<< HEAD
     component: ChannelRatingByMonthComponent,
   },
+=======
+    component: ChannelRatingByMonthComponent
+  }
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
 ];
 
 // Export the routes
@@ -88,6 +128,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+<<<<<<< HEAD
         component: DashboardComponent,
       },
       {
@@ -101,25 +142,53 @@ export const routes: Routes = [
       {
         path: 'faq',
         component: FaqComponent,
+=======
+        component: DashboardComponent
+      },
+      {
+        path: 'demo',
+        component: DemoComponent
+      },
+      {
+        path: 'support',
+        component: SupportComponent
+      },
+      {
+        path: 'faq',
+        component: FaqComponent
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
       },
       {
         path: 'user-management',
         component: UserManagementComponent,
+<<<<<<< HEAD
         children: userManagementRoutes,
+=======
+        children: userManagementRoutes
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
       },
       {
         path: 'reports/sales',
         component: SalesComponent,
+<<<<<<< HEAD
         children: salesReportRoutes,
+=======
+        children: salesReportRoutes
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
       },
       {
         path: 'reports/agent-performance',
         component: AgentPerformanceComponent,
+<<<<<<< HEAD
         children: agentPerformanceRoutes,
+=======
+        children: agentPerformanceRoutes
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
       },
       {
         path: 'reports/customer-feedback',
         component: CustomerFeedbackComponent,
+<<<<<<< HEAD
         children: customerFeedbackRoutes,
       },
     ],
@@ -129,4 +198,15 @@ export const routes: Routes = [
     path: 'signin',
     component: SigninComponent,
   },
+=======
+        children: customerFeedbackRoutes
+      }
+    ],
+    canActivate: [authGuard]
+  },
+  {
+    path: 'signin',
+    component: SigninComponent
+  }
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
 ];

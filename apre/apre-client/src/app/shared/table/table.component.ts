@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   Component,
   Input,
@@ -5,6 +6,9 @@ import {
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
+=======
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -17,6 +21,7 @@ import { CommonModule } from '@angular/common';
       <table class="table">
         <thead class="table__head" [ngClass]="headerBackground">
           <tr class="table__row">
+<<<<<<< HEAD
             @for (header of headers; track header) {
               <th
                 class="table__header"
@@ -34,15 +39,28 @@ import { CommonModule } from '@angular/common';
                         : 'fa-sort'
                     "
                   ></i>
+=======
+            @for(header of headers; track header) {
+              <th class="table__header" (click)="sortableColumns.includes(header) && sortData(header)">
+                <span class="header-content">
+                  {{ header }}
+                  <i class="fa" [ngClass]="sortedColumn === header ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"></i>
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
                 </span>
               </th>
             }
           </tr>
         </thead>
         <tbody class="table__body">
+<<<<<<< HEAD
           @for (row of paginatedData; track row) {
             <tr class="table__row">
               @for (header of headers; track header) {
+=======
+          @for(row of paginatedData; track row) {
+            <tr class="table__row">
+              @for(header of headers; track header) {
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
                 <td class="table__cell">{{ row[header] }}</td>
               }
             </tr>
@@ -50,6 +68,7 @@ import { CommonModule } from '@angular/common';
         </tbody>
       </table>
       <div class="pagination">
+<<<<<<< HEAD
         <button
           class="button button--primary"
           (click)="changePage(currentPage - 1)"
@@ -65,6 +84,11 @@ import { CommonModule } from '@angular/common';
         >
           Next
         </button>
+=======
+        <button class="button button--primary" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+        <span class="pagination__info">Page {{ currentPage }}</span>
+        <button class="button button--primary" (click)="changePage(currentPage + 1)" [disabled]="currentPage * recordsPerPage >= data.length">Next</button>
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
       </div>
     </div>
   `,
@@ -106,8 +130,12 @@ import { CommonModule } from '@angular/common';
       border-bottom: 1px solid #ddd;
     }
 
+<<<<<<< HEAD
     .table__header,
     .table__cell {
+=======
+    .table__header, .table__cell {
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
       padding: 10px;
       text-align: left;
       position: relative;
@@ -136,7 +164,11 @@ import { CommonModule } from '@angular/common';
     .pagination__info {
       align-self: center;
     }
+<<<<<<< HEAD
   `,
+=======
+  `
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
 })
 export class TableComponent implements OnInit, OnChanges {
   @Input() title!: string;
@@ -150,9 +182,15 @@ export class TableComponent implements OnInit, OnChanges {
   sortedColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
+<<<<<<< HEAD
   constructor() {}
 
   ngOnInit(): void {}
+=======
+  constructor() { }
+
+  ngOnInit(): void { }
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
@@ -184,4 +222,8 @@ export class TableComponent implements OnInit, OnChanges {
   changePage(page: number) {
     this.currentPage = page;
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c

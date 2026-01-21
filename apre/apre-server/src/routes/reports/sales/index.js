@@ -5,10 +5,17 @@
  * Description: Apre sales report API for the sales reports
  */
 
+<<<<<<< HEAD
 "use strict";
 
 const express = require("express");
 const { mongo } = require("../../../utils/mongo");
+=======
+'use strict';
+
+const express = require('express');
+const { mongo } = require('../../../utils/mongo');
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
 
 const router = express.Router();
 
@@ -24,6 +31,7 @@ const router = express.Router();
  *  .then(response => response.json())
  *  .then(data => console.log(data));
  */
+<<<<<<< HEAD
 router.get("/regions", (req, res, next) => {
   try {
     mongo(async (db) => {
@@ -32,6 +40,16 @@ router.get("/regions", (req, res, next) => {
     }, next);
   } catch (err) {
     console.error("Error getting regions: ", err);
+=======
+router.get('/regions', (req, res, next) => {
+  try {
+    mongo (async db => {
+      const regions = await db.collection('sales').distinct('region');
+      res.send(regions);
+    }, next);
+  } catch (err) {
+    console.error('Error getting regions: ', err);
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
     next(err);
   }
 });
@@ -48,6 +66,7 @@ router.get("/regions", (req, res, next) => {
  *  .then(response => response.json())
  *  .then(data => console.log(data));
  */
+<<<<<<< HEAD
 router.get("/regions/:region", (req, res, next) => {
   try {
     mongo(async (db) => {
@@ -77,10 +96,39 @@ router.get("/regions/:region", (req, res, next) => {
     }, next);
   } catch (err) {
     console.error("Error getting sales data for region: ", err);
+=======
+router.get('/regions/:region', (req, res, next) => {
+  try {
+    mongo (async db => {
+      const salesReportByRegion = await db.collection('sales').aggregate([
+        { $match: { region: req.params.region } },
+        {
+          $group: {
+            _id: '$salesperson',
+            totalSales: { $sum: '$amount'}
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            salesperson: '$_id',
+            totalSales: 1
+          }
+        },
+        {
+          $sort: { salesperson: 1 }
+        }
+      ]).toArray();
+      res.send(salesReportByRegion);
+    }, next);
+  } catch (err) {
+    console.error('Error getting sales data for region: ', err);
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
     next(err);
   }
 });
 
+<<<<<<< HEAD
 /**
  * GET /monthly
  * Returns monthly sales totals (and order counts) grouped by month.
@@ -125,3 +173,6 @@ router.get("/monthly", (req, res, next) => {
 });
 
 module.exports = router;
+=======
+module.exports = router;
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c

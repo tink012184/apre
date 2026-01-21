@@ -3,6 +3,7 @@
 
 module.exports = function (config) {
   config.set({
+<<<<<<< HEAD
     basePath: "",
     frameworks: ["jasmine", "@angular-devkit/build-angular"],
     plugins: [
@@ -12,6 +13,17 @@ module.exports = function (config) {
       require("karma-jasmine-html-reporter"),
       require("karma-coverage"),
       require("@angular-devkit/build-angular/plugins/karma"),
+=======
+    basePath: '',
+    frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    plugins: [
+      require('karma-firefox-launcher'),
+      require('karma-jasmine'),
+      require('karma-chrome-launcher'),
+      require('karma-jasmine-html-reporter'),
+      require('karma-coverage'),
+      require('@angular-devkit/build-angular/plugins/karma')
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
     ],
     client: {
       jasmine: {
@@ -20,6 +32,7 @@ module.exports = function (config) {
         // for example, you can disable the random execution with `random: false`
         // or set a specific seed with `seed: 4321`
       },
+<<<<<<< HEAD
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
     },
     jasmineHtmlReporter: {
@@ -33,5 +46,23 @@ module.exports = function (config) {
     reporters: ["progress", "kjhtml"],
     browsers: ["Chrome"],
     restartOnFileChange: true,
+=======
+      clearContext: false // leave Jasmine Spec Runner output visible in browser
+    },
+    jasmineHtmlReporter: {
+      suppressAll: true // removes the duplicated traces
+    },
+    coverageReporter: {
+      dir: require('path').join(__dirname, './coverage/ets-client'),
+      subdir: '.',
+      reporters: [
+        { type: 'html' },
+        { type: 'text-summary' }
+      ]
+    },
+    reporters: ['progress', 'kjhtml'],
+    browsers: ['Firefox'],
+    restartOnFileChange: true
+>>>>>>> 4a157f7b7cdbe68441b146a79284a2c913eddb3c
   });
 };
