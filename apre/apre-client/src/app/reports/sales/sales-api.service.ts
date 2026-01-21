@@ -10,16 +10,23 @@ export interface MonthlySales {
 
 @Injectable({ providedIn: 'root' })
 export class SalesApiService {
-  private readonly baseUrl = '/api/sales';
+  private readonly baseUrl = 'http://localhost:3000/api/reports/sales';
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Fetch monthly sales for a given year.
-   * Example endpoint: GET /api/sales/monthly?year=2026
-   */
-  fetchMonthlySales(year?: number) {
-    const url = year ? `/api/sales/monthly?year=${year}` : `/api/sales/monthly`;
-    return this.http.get<MonthlySales[]>(url);
+  fetchMonthlySales(year?: number): Observable<MonthlySales[]> {
+    const url = `${this.baseUrl}/monthly`;
+
+    // year as a query param:
+    const params = year ? new HttpParams().set('year', year) : undefined;
+
+    return this.http.get<MonthlySales[]>(url, { params });
+  }
+
+  fetchMonthlySalesByMonth(month: string) {
+    // calls: /api/reports/sales/monthly?month=2026-01
+    return this.http.get<MonthlySales[]>(`${this.baseUrl}/monthly`, {
+      params: { month },
+    });
   }
 }

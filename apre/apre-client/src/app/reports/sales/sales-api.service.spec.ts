@@ -3,7 +3,7 @@ import {
   HttpClientTestingModule,
   HttpTestingController,
 } from '@angular/common/http/testing';
-import { SalesApiService, MonthlySales } from './sales-api.service';
+import { SalesApiService } from './sales-api.service';
 
 describe('SalesApiService', () => {
   let service: SalesApiService;
@@ -12,7 +12,6 @@ describe('SalesApiService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [SalesApiService],
     });
 
     service = TestBed.inject(SalesApiService);
@@ -23,48 +22,52 @@ describe('SalesApiService', () => {
     httpMock.verify();
   });
 
-  it('should call GET /api/sales/monthly with year query param', () => {
+  it('should call GET /api/reports/sales/monthly with year query param', () => {
     service.fetchMonthlySales(2026).subscribe();
 
-    const req = httpMock.expectOne(
-      (r) =>
+    const req = httpMock.expectOne((r) => {
+      return (
         r.method === 'GET' &&
-        r.url === '/api/sales/monthly' &&
-        r.params.get('year') === '2026',
-    );
+        r.url === 'http://localhost:3000/api/reports/sales/monthly' &&
+        r.params.get('year') === '2026'
+      );
+    });
 
-    expect(req.request.method).toBe('GET');
     req.flush([]);
   });
 
   it('should return parsed monthly sales data', () => {
-    const mock: MonthlySales[] = [
-      { month: '2026-01', total: 12000, orders: 40 },
-      { month: '2026-02', total: 9000, orders: 31 },
-    ];
+    const mock = [{ month: '2026-01', total: 100, orders: 2 }];
 
     service.fetchMonthlySales(2026).subscribe((data) => {
-      expect(data.length).toBe(2);
-      expect(data[0].month).toBe('2026-01');
-      expect(data[0].total).toBe(12000);
+      expect(data).toEqual(mock);
     });
 
-    const req = httpMock.expectOne('/api/sales/monthly?year=2026');
+    const req = httpMock.expectOne((r) => {
+      return (
+        r.method === 'GET' &&
+        r.url === 'http://localhost:3000/api/reports/sales/monthly' &&
+        r.params.get('year') === '2026'
+      );
+    });
+
     req.flush(mock);
   });
 
   it('should surface HTTP errors to the caller', () => {
     service.fetchMonthlySales(2026).subscribe({
-      next: () => fail('expected an error'),
-      error: (err) => {
-        expect(err.status).toBe(500);
-      },
+      next: () => fail('expected error'),
+      error: (err) => expect(err.status).toBe(500),
     });
 
-    const req = httpMock.expectOne('/api/sales/monthly?year=2026');
-    req.flush(
-      { message: 'Server error' },
-      { status: 500, statusText: 'Server Error' },
-    );
+    const req = httpMock.expectOne((r) => {
+      return (
+        r.method === 'GET' &&
+        r.url === 'http://localhost:3000/api/reports/sales/monthly' &&
+        r.params.get('year') === '2026'
+      );
+    });
+
+    req.flush('Server error', { status: 500, statusText: 'Server Error' });
   });
 });

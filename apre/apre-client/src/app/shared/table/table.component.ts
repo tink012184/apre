@@ -145,7 +145,6 @@ export class TableComponent implements OnInit, OnChanges {
   @Input() recordsPerPage: number = 10;
   @Input() sortableColumns!: string[];
   @Input() headerBackground: 'default' | 'primary' | 'secondary' = 'default';
-  @Input() rows: any[] = [];
 
   currentPage: number = 1;
   sortedColumn: string = '';

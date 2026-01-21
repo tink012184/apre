@@ -89,23 +89,28 @@ router.get("/regions/:region", (req, res, next) => {
 router.get("/monthly", (req, res, next) => {
   try {
     mongo(async (db) => {
+      const DATE_FIELD = "date";
+      const AMOUNT_FIELD = "amount";
+
       const pipeline = [
+        // only docs with a valid date
+        {
+          $match: {
+            [DATE_FIELD]: { $type: "date" },
+          },
+        },
+        // group by calendar month (YYYY-MM)
         {
           $group: {
-            _id: "$month",
-            total: { $sum: "$amount" },
+            _id: {
+              $dateToString: { format: "%Y-%m", date: `$${DATE_FIELD}` },
+            },
+            total: { $sum: `$${AMOUNT_FIELD}` },
             orders: { $sum: 1 },
           },
         },
-        {
-          $project: {
-            _id: 0,
-            month: "$_id",
-            total: 1,
-            orders: 1,
-          },
-        },
-        { $sort: { month: 1 } }, // "YYYY-MM" sorts correctly
+        { $project: { _id: 0, month: "$_id", total: 1, orders: 1 } },
+        { $sort: { month: 1 } },
       ];
 
       const results = await db
@@ -115,7 +120,6 @@ router.get("/monthly", (req, res, next) => {
       res.json(results);
     }, next);
   } catch (err) {
-    console.error("Error getting monthly sales: ", err);
     next(err);
   }
 });
