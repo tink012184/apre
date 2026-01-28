@@ -43,7 +43,7 @@ import { CookieService } from 'ngx-cookie-service';
             class="signin__input"
           />
         </div>
-        <input type="submit" class="signin__button" Value="Submit" />
+        <input type="submit" class="signin__button" Value="Sign In" />
       </form>
       <a href="/" class="signin__return-link">Return to Home</a>
     </div>
