@@ -34,7 +34,7 @@ type Vm =
           *ngIf="vm.state === 'ready'"
           title="Sales by Month (All Years)"
           [headers]="['month', 'total', 'orders']"
-          [data]="vm.rows ?? []"
+          [data]="vm.rows"
         ></app-table>
       </ng-container>
     </section>
