@@ -1,4 +1,12 @@
-import { Component, ElementRef, Input, OnInit, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Input,
+  OnInit,
+  ViewChild,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { Chart, ChartTypeRegistry, registerables } from 'chart.js';
 Chart.register(...registerables);
 
@@ -22,20 +30,21 @@ Chart.register(...registerables);
       width: 100%;
       height: 100%;
     }
-  `
+  `,
 })
 export class ChartComponent implements OnInit, OnChanges {
   @Input() type!: keyof ChartTypeRegistry;
   @Input() label!: string;
   @Input() data!: number[];
   @Input() labels!: string[];
+  @Input() datasets?: { label: string; data: number[] }[];
 
   @ViewChild('chartCanvas') chartCanvas!: ElementRef;
   private chart!: Chart;
 
-  constructor() { }
+  constructor() {}
 
-  ngOnInit(): void { }
+  ngOnInit(): void {}
 
   ngAfterViewInit(): void {
     this.createChart();
@@ -52,39 +61,51 @@ export class ChartComponent implements OnInit, OnChanges {
       type: this.type,
       data: {
         labels: this.labels,
-        datasets: [{
-          label: this.label,
-          data: this.data,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)'
-          ],
-          borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)'
-          ],
-          borderWidth: 1
-        }]
+        datasets: this.datasets?.length
+          ? this.datasets
+          : ([
+              {
+                label: this.label,
+                data: this.data,
+                backgroundColor: [
+                  'rgba(255, 99, 132, 0.2)',
+                  'rgba(54, 162, 235, 0.2)',
+                  'rgba(255, 206, 86, 0.2)',
+                  'rgba(75, 192, 192, 0.2)',
+                  'rgba(153, 102, 255, 0.2)',
+                  'rgba(255, 159, 64, 0.2)',
+                ],
+                borderColor: [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)',
+                  'rgba(255, 159, 64, 1)',
+                ],
+                borderWidth: 1,
+              },
+            ] as any),
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false
-      }
+        maintainAspectRatio: false,
+      },
     });
   }
 
   updateChart(): void {
     this.chart.data.labels = this.labels;
-    this.chart.data.datasets[0].data = this.data;
-    this.chart.data.datasets[0].label = this.label;
+
+    if (this.datasets?.length) {
+      // Use multi-series datasets passed in from parent
+      this.chart.data.datasets = this.datasets as any;
+    } else {
+      // Fallback to the existing single-series behavior
+      this.chart.data.datasets[0].data = this.data;
+      this.chart.data.datasets[0].label = this.label;
+    }
+
     this.chart.update();
   }
 }

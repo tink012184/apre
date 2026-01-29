@@ -7,6 +7,12 @@ export interface TeamPerformanceRow {
   score: number;
 }
 
+export interface TeamPerformanceDualRow {
+  agent: string;
+  customerSatisfaction: number;
+  salesConversion: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AgentPerformanceService {
   private apiBase = 'http://localhost:3000/api/reports/agent-performance';
@@ -20,6 +26,12 @@ export class AgentPerformanceService {
   getTeamPerformance(team: string): Observable<TeamPerformanceRow[]> {
     return this.http.get<TeamPerformanceRow[]>(
       `${this.apiBase}/teams/${encodeURIComponent(team)}`,
+    );
+  }
+
+  getTeamPerformanceDual(team: string): Observable<TeamPerformanceDualRow[]> {
+    return this.http.get<TeamPerformanceDualRow[]>(
+      `${this.apiBase}/teams/${encodeURIComponent(team)}/dual`,
     );
   }
 }

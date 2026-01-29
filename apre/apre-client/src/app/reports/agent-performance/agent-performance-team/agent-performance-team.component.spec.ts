@@ -6,10 +6,14 @@ import { of, throwError } from 'rxjs';
 describe('AgentPerformanceTeamComponent', () => {
   const mockSvc = {
     getTeams: jasmine.createSpy('getTeams'),
-    getTeamPerformance: jasmine.createSpy('getTeamPerformance'),
+    getTeamPerformanceDual: jasmine.createSpy('getTeamPerformanceDual'),
   };
 
   beforeEach(async () => {
+    // Reset spies BEFORE configuring
+    mockSvc.getTeams.calls.reset();
+    mockSvc.getTeamPerformanceDual.calls.reset();
+
     await TestBed.configureTestingModule({
       imports: [AgentPerformanceTeamComponent],
       providers: [{ provide: AgentPerformanceService, useValue: mockSvc }],
@@ -21,15 +25,19 @@ describe('AgentPerformanceTeamComponent', () => {
 
     const fixture = TestBed.createComponent(AgentPerformanceTeamComponent);
     const component = fixture.componentInstance;
+
+    // trigger ngOnInit
+    fixture.detectChanges();
+
     expect(component).toBeTruthy();
   });
 
-  it('should load teams and auto-load first team performance', () => {
-    mockSvc.getTeams.and.returnValue(of(['Texas', 'West']));
-    mockSvc.getTeamPerformance.and.returnValue(
+  it('should load teams and auto-load first team performance (dual metrics)', () => {
+    mockSvc.getTeams.and.returnValue(of(['TeleSales Titans', 'West']));
+    mockSvc.getTeamPerformanceDual.and.returnValue(
       of([
-        { agent: 'Agent A', score: 90 },
-        { agent: 'Agent B', score: 80 },
+        { agent: '1023', customerSatisfaction: 85, salesConversion: 75 },
+        { agent: '1024', customerSatisfaction: 90, salesConversion: 60 },
       ]),
     );
 
@@ -37,9 +45,17 @@ describe('AgentPerformanceTeamComponent', () => {
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
-    expect(component.selectedTeam).toBe('Texas');
-    expect(component.chartLabels).toEqual(['Agent A', 'Agent B']);
-    expect(component.chartData).toEqual([90, 80]);
+
+    expect(component.selectedTeam).toBe('TeleSales Titans');
+    expect(mockSvc.getTeamPerformanceDual).toHaveBeenCalledWith(
+      'TeleSales Titans',
+    );
+
+    expect(component.chartLabels).toEqual(['1023', '1024']);
+    expect(component.datasets.length).toBe(2);
+    expect(component.datasets[0].data).toEqual([85, 90]);
+    expect(component.datasets[1].data).toEqual([75, 60]);
+    expect(component.vm.state).toBe('ready');
   });
 
   it('should set error state when teams API fails', () => {
@@ -49,6 +65,7 @@ describe('AgentPerformanceTeamComponent', () => {
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
+
     expect(component.vm.state).toBe('error');
     if (component.vm.state === 'error') {
       expect(component.vm.message).toContain(

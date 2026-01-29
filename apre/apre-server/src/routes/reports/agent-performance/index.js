@@ -133,74 +133,80 @@ router.get("/metrics", (req, res, next) => {
 });
 
 /**
- * GET /api/reports/agent-performance/teams/:team
- *
- * Returns: [{ agent: "1023", score: 85 }]
- * - If metricType is provided: avg value for that metric per agentId
- * - If not provided: avg across ALL metrics per agentId
+ * GET /api/reports/agent-performance/teams/:team/dual
+ * Returns: [{ agent: "1023", customerSatisfaction: 85, salesConversion: 75 }]
  */
-router.get("/teams/:team", (req, res, next) => {
+router.get("/teams/:team/dual", (req, res, next) => {
   try {
     const teamParam = req.params.team;
-    const metricType = req.query.metricType;
 
     mongo(async (db) => {
-      const pipeline = [
-        // match team (case/space safe)
-        {
-          $match: {
-            $expr: {
-              $eq: [
-                { $toLower: { $trim: { input: "$team" } } },
-                { $toLower: { $trim: { input: teamParam } } },
-              ],
-            },
-          },
-        },
-        // expand metrics array
-        { $unwind: "$performanceMetrics" },
-      ];
-
-      // If user selected a metric type, filter to it
-      if (metricType) {
-        pipeline.push({
-          $match: {
-            $expr: {
-              $eq: [
-                {
-                  $toLower: {
-                    $trim: { input: "$performanceMetrics.metricType" },
-                  },
-                },
-                { $toLower: { $trim: { input: metricType } } },
-              ],
-            },
-          },
-        });
-      }
-
-      // group per agentId
-      pipeline.push(
-        {
-          $group: {
-            _id: "$agentId",
-            score: { $avg: "$performanceMetrics.value" },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            agent: { $toString: "$_id" },
-            score: { $round: ["$score", 2] },
-          },
-        },
-        { $sort: { score: -1 } },
-      );
-
       const rows = await db
         .collection("agentPerformance")
-        .aggregate(pipeline)
+        .aggregate([
+          // match team safely
+          {
+            $match: {
+              $expr: {
+                $eq: [
+                  { $toLower: { $trim: { input: "$team" } } },
+                  { $toLower: { $trim: { input: teamParam } } },
+                ],
+              },
+            },
+          },
+          // expand metrics
+          { $unwind: "$performanceMetrics" },
+
+          // only the two metrics we care about
+          {
+            $match: {
+              "performanceMetrics.metricType": {
+                $in: ["Customer Satisfaction", "Sales Conversion"],
+              },
+            },
+          },
+
+          // group by agentId + metricType
+          {
+            $group: {
+              _id: {
+                agentId: "$agentId",
+                metricType: "$performanceMetrics.metricType",
+              },
+              avgValue: { $avg: "$performanceMetrics.value" },
+            },
+          },
+
+          // pivot into one doc per agentId
+          {
+            $group: {
+              _id: "$_id.agentId",
+              metrics: {
+                $push: {
+                  k: "$_id.metricType",
+                  v: { $round: ["$avgValue", 2] },
+                },
+              },
+            },
+          },
+          { $addFields: { metricsObj: { $arrayToObject: "$metrics" } } },
+
+          // shape for the client
+          {
+            $project: {
+              _id: 0,
+              agent: { $toString: "$_id" },
+              customerSatisfaction: {
+                $ifNull: ["$metricsObj.Customer Satisfaction", 0],
+              },
+              salesConversion: { $ifNull: ["$metricsObj.Sales Conversion", 0] },
+            },
+          },
+          { $sort: { customerSatisfaction: -1 } },
+        ])
         .toArray();
+
       res.send(rows);
     }, next);
   } catch (err) {

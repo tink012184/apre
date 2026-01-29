@@ -5,7 +5,7 @@ import { catchError, of, switchMap } from 'rxjs';
 
 import {
   AgentPerformanceService,
-  TeamPerformanceRow,
+  TeamPerformanceDualRow,
 } from '../agent-performance-by-team.service';
 import { ChartComponent } from '../../../shared/chart/chart.component';
 
@@ -15,7 +15,7 @@ type Vm =
       state: 'ready';
       teams: string[];
       selectedTeam: string;
-      rows: TeamPerformanceRow[];
+      rows: TeamPerformanceDualRow[];
     }
   | { state: 'error'; message: string };
 
@@ -27,7 +27,7 @@ type Vm =
     <section class="page">
       <header class="page__header">
         <h2>Agent Performance by Team</h2>
-        <p class="muted">Average performance score per agent.</p>
+        <p class="muted">Performance score per agent by metric.</p>
       </header>
 
       <div class="controls" *ngIf="vm.state !== 'error'">
@@ -57,7 +57,7 @@ type Vm =
         <app-chart
           [title]="'Performance – ' + selectedTeam"
           [labels]="chartLabels"
-          [data]="chartData"
+          [datasets]="datasets"
           [type]="'bar'"
         >
         </app-chart>
@@ -125,10 +125,12 @@ export class AgentPerformanceTeamComponent implements OnInit {
 
   teams: string[] = [];
   selectedTeam = '';
-  rows: TeamPerformanceRow[] = [];
+  rows: TeamPerformanceDualRow[] = [];
 
   chartLabels: string[] = [];
   chartData: number[] = [];
+
+  datasets: { label: string; data: number[] }[] = [];
 
   constructor(private svc: AgentPerformanceService) {}
 
@@ -151,17 +153,19 @@ export class AgentPerformanceTeamComponent implements OnInit {
             return of([]);
           }
 
-          return this.svc.getTeamPerformance(this.selectedTeam);
+          return this.svc.getTeamPerformanceDual(this.selectedTeam);
         }),
         catchError(() => {
           this.vm = {
             state: 'error',
             message: 'Failed to load agent performance data',
           };
-          return of([]);
+          return of(null);
         }),
       )
-      .subscribe((rows) => this.setReady(rows));
+      .subscribe((rows) => {
+        if (rows) this.setReady(rows);
+      });
   }
 
   onTeamChange(team: string): void {
@@ -169,29 +173,41 @@ export class AgentPerformanceTeamComponent implements OnInit {
     this.vm = { state: 'loading' };
 
     this.svc
-      .getTeamPerformance(team)
+      .getTeamPerformanceDual(team)
       .pipe(
         catchError(() => {
           this.vm = {
             state: 'error',
             message: 'Failed to load agent performance data',
           };
-          return of([]);
+          return of(null);
         }),
       )
-      .subscribe((rows) => this.setReady(rows));
+      .subscribe((rows) => {
+        if (rows) this.setReady(rows);
+      });
   }
 
-  private setReady(rows: TeamPerformanceRow[]): void {
+  private setReady(rows: TeamPerformanceDualRow[]): void {
     this.rows = rows ?? [];
     this.chartLabels = this.rows.map((r) => r.agent);
-    this.chartData = this.rows.map((r) => r.score);
+
+    this.datasets = [
+      {
+        label: 'Customer Satisfaction',
+        data: this.rows.map((r) => r.customerSatisfaction),
+      },
+      {
+        label: 'Sales Conversion',
+        data: this.rows.map((r) => r.salesConversion),
+      },
+    ];
 
     this.vm = {
       state: 'ready',
       teams: this.teams,
       selectedTeam: this.selectedTeam,
-      rows: this.rows,
+      rows: this.rows as any,
     };
   }
 }
