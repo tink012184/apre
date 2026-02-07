@@ -5,90 +5,62 @@
  * Description: Apre customer feedback API for the customer feedback reports
  */
 
-'use strict';
+"use strict";
 
-const express = require('express');
-const { mongo } = require('../../../utils/mongo');
-const createError = require('http-errors');
+const express = require("express");
+const { mongo } = require("../../../utils/mongo");
+const createError = require("http-errors");
 
 const router = express.Router();
 
 /**
- * @description
+ * GET /reports/customer-feedback/by-product
  *
- * GET /channel-rating-by-month
+ * Returns customer feedback aggregated by product.
  *
- * Fetches average customer feedback ratings by channel for a specified month.
- *
- * Example:
- * fetch('/channel-rating-by-month?month=1')
- *  .then(response => response.json())
- *  .then(data => console.log(data));
+ * Response example:
+ * [
+ *   { product: "Internet", responses: 42, avgRating: 4.21 },
+ *   { product: "Mobile", responses: 18, avgRating: 3.78 }
+ * ]
  */
-router.get('/channel-rating-by-month', (req, res, next) => {
+router.get("/by-product", (req, res, next) => {
   try {
-    const { month } = req.query;
+    mongo(async (db) => {
+      const collection = db.collection("customerFeedback");
 
-    if (!month) {
-      return next(createError(400, 'month and channel are required'));
-    }
-
-    mongo (async db => {
-      const data = await db.collection('customerFeedback').aggregate([
-        {
-          $addFields: {
-            date: { $toDate: '$date' }
-          }
-        },
-        {
-          $group: {
-            _id: {
-              channel: "$channel",
-              month: { $month: "$date" },
+      const results = await collection
+        .aggregate([
+          {
+            $match: {
+              product: { $exists: true, $ne: null, $ne: "" },
+              rating: { $exists: true, $ne: null },
             },
-            ratingAvg: { $avg: '$rating'}
-          }
-        },
-        {
-          $match: {
-            '_id.month': Number(month)
-          }
-        },
-        {
-          $group: {
-            _id: '$_id.channel',
-            ratingAvg: { $push: '$ratingAvg' }
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            channel: '$_id',
-            ratingAvg: 1
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            channels: { $push: '$channel' },
-            ratingAvg: { $push: '$ratingAvg' }
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            channels: 1,
-            ratingAvg: 1
-          }
-        }
-      ]).toArray();
+          },
+          {
+            $group: {
+              _id: "$product",
+              responses: { $sum: 1 },
+              avgRating: { $avg: "$rating" },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              product: "$_id",
+              responses: 1,
+              avgRating: { $round: ["$avgRating", 2] },
+            },
+          },
+          { $sort: { responses: -1, product: 1 } },
+        ])
+        .toArray();
 
-      res.send(data);
+      res.send(results);
     }, next);
-
   } catch (err) {
-    console.error('Error in /rating-by-date-range-and-channel', err);
-    next(err);
+    console.error("Error getting customer feedback by product:", err);
+    next(createError(500, "Unable to fetch customer feedback by product"));
   }
 });
 

@@ -6,7 +6,10 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { DashboardComponent } from './dashboard.component';
 import { environment } from '../../environments/environment';
 
@@ -19,10 +22,9 @@ describe('DashboardComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         DashboardComponent,
-        HttpClientTestingModule // Add HttpClientModule to the imports array
-      ]
-    })
-    .compileComponents();
+        HttpClientTestingModule, // Add HttpClientModule to the imports array
+      ],
+    }).compileComponents();
 
     httpTestingController = TestBed.inject(HttpTestingController);
 
@@ -48,17 +50,35 @@ describe('DashboardComponent', () => {
   });
 
   it('should display data in the table when tableData is populated', () => {
-    const mockAgentFeedbackData = [
-      { agent: 'Agent 1', callDuration: '5 mins', customerFeedback: 'Positive' },
-      { agent: 'Agent 2', callDuration: '10 mins', customerFeedback: 'Neutral' }
+    // ✅ IMPORTANT: turn off the spinner so the table renders
+    component.loadingAgentFeedbackData = false;
+
+    // Arrange
+    component.tableData = [
+      {
+        agent: 'Agent 1',
+        callDuration: '5 mins',
+        customerFeedback: 'Positive',
+      },
+      {
+        agent: 'Agent 2',
+        callDuration: '10 mins',
+        customerFeedback: 'Neutral',
+      },
     ];
 
-    // Simulate the loadAgentFeedbackData method
-    component.tableData = mockAgentFeedbackData;
-    fixture.detectChanges(); // Trigger change detection
+    // Act
+    fixture.detectChanges();
 
-    const tableRows = fixture.nativeElement.querySelectorAll('.dashboard__table-container .table tbody tr');
-    expect(tableRows.length).toBe(2); // Check if there are two rows
+    // Assert
+    const table = fixture.nativeElement.querySelector(
+      '.dashboard__table-container table.table',
+    ) as HTMLTableElement;
+
+    expect(table).toBeTruthy();
+
+    const tableRows = table.querySelectorAll('tbody tr');
+    expect(tableRows.length).toBe(2);
 
     const firstRowCells = tableRows[0].querySelectorAll('td');
     expect(firstRowCells[0].textContent).toContain('Agent 1');

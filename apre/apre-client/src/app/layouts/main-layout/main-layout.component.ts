@@ -365,6 +365,10 @@ export class MainLayoutComponent {
       name: 'Channel Rating by Month',
       url: '/reports/customer-feedback/channel-rating-by-month',
     },
+    {
+      name: 'Customer Feedback by Product',
+      url: '/reports/customer-feedback/by-product',
+    },
     // Add more reports as needed
   ];
 
